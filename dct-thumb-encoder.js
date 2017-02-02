@@ -2,10 +2,10 @@
 
 class Encoder {
 
-	constructor () {
+	constructor ( blockSize, coefficients ) {
 
-		this.BLOCK_SIZE = 16;
-		this.coefficients = 4;
+		this.BLOCK_SIZE = blockSize || 16;
+		this.coefficients = coefficients || 4;
 
 		this.DCTMatrix = [];
 		this.initDCTMatrix();
