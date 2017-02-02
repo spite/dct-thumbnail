@@ -1,0 +1,68 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<title>DCT</title>
+	<style>
+	*{ box-sizing: border-box; margin: 0; padding: 0; }
+	div[thumb-src]{
+		position: relative;
+		margin: 20px;
+	}
+	div[thumb-src] img{
+		position: absolute;
+		left: 0;
+		top: 0;
+		opacity: 0;
+		transition: opacity 500ms ease-out;
+	}
+	</style>
+</head>
+
+<body>
+
+	<!--<div original-src="pattern.png" thumb-src="pattern-thumb.png" thumb-width="256" thumb-height="256" ></div>
+	<div original-src="cruciform.png" thumb-src="cruciform-thumb.png" thumb-width="512" thumb-height="256" ></div>
+	<div original-src="mona-lisa.jpg" thumb-src="mona-lisa-thumb.png" thumb-width="687" thumb-height="1024" ></div>
+	<div original-src="polygon.png" thumb-src="polygon-thumb.png" thumb-width="2880" thumb-height="1800" ></div>
+	<div original-src="dof.png" thumb-src="dof-thumb.png" thumb-width="2880" thumb-height="1800" ></div>-->
+
+	<div original-src="star-wars-force-awakens-official-poster.jpg" thumb-src="star-wars-force-awakens-official-poster-thumb.png" thumb-width="1458" thumb-height="2160" ></div>
+	<div original-src="mona-lisa.jpg" thumb-src="mona-lisa-thumb.png" thumb-width="687" thumb-height="1024" ></div>
+
+
+</body>
+
+<script type="text/javascript" src="dct-thumb-decoder.min.js"></script>
+<script type="text/javascript">
+
+var thumbs = document.querySelectorAll( '[thumb-src]');
+[].forEach.call( thumbs, function( e ) {
+
+	var dec = new Decoder();
+	e.appendChild( dec.tmpCanvas );
+	e.style.width = e.getAttribute( 'thumb-width' ) + 'px';
+	e.style.height = e.getAttribute( 'thumb-height' ) + 'px';
+	dec.tmpCanvas.style.width = '100%';
+	dec.tmpCanvas.style.height = '100%';
+
+	var img = new Image();
+
+	img.onload = function() {
+		dec.decode( img );
+
+		var fullImg = new Image();
+		e.appendChild( fullImg );
+		fullImg.onload = function() {
+			requestAnimationFrame( function() { fullImg.style.opacity = 1 } );
+		}
+		fullImg.src = e.getAttribute( 'original-src' );
+	}
+
+	img.src = e.getAttribute( 'thumb-src' );
+
+})
+
+</script>
+
+</html>
