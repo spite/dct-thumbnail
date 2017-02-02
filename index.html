@@ -3,19 +3,38 @@
 <head>
 	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
 	<title>DCT</title>
+	<link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
 	<style>
-	*{ box-sizing: border-box; margin: 0; padding: 0; }
+	*{ box-sizing: border-box; margin: 0; padding: 0; font-family: roboto, serif; font-size: 14px; }
+	body{ padding: 40px }
+	p{ padding-bottom: 20px;}
 	div[thumb-src]{
 		position: relative;
-		margin: 20px;
+		margin-bottom: 80px;
 	}
-	div[thumb-src] img{
+	div[thumb-src] canvas{
 		position: absolute;
 		left: 0;
 		top: 0;
+		right: 0;
+		bottom: 0;
 		opacity: 0;
+		transition: opacity 100ms ease-out;
+	}
+	div[thumb-src] img.final{
+		position: absolute;
+		left: 0;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		opacity: 0;
+		width: 100%;
+		height: 100%;
 		transition: opacity 500ms ease-out;
 	}
+	div[thumb-src] div{ }
+	div[thumb-src] noscript{ display: block}
+	div[thumb-src] noscript img{ width: 100%; position: absolute;}
 	</style>
 </head>
 
@@ -27,42 +46,59 @@
 	<div original-src="polygon.png" thumb-src="polygon-thumb.png" thumb-width="2880" thumb-height="1800" ></div>
 	<div original-src="dof.png" thumb-src="dof-thumb.png" thumb-width="2880" thumb-height="1800" ></div>-->
 
-	<div original-src="star-wars-force-awakens-official-poster.jpg" thumb-src="star-wars-force-awakens-official-poster-thumb.png" thumb-width="1458" thumb-height="2160" ></div>
-	<div original-src="mona-lisa.jpg" thumb-src="mona-lisa-thumb.png" thumb-width="687" thumb-height="1024" ></div>
+	<h3>Pattern</h3>
+	<p>PNG 256x256 - 8.6KB</p>
+	<div thumb-lazy original-src="pattern.png" thumb-src="pattern-thumb.png" thumb-width="256" thumb-height="256" style="width: 100%%;" >
+		<div style="padding-bottom: 100%">
+			<noscript>
+				<img src="pattern.jpg" />
+			</noscript>
+		</div>
+	</div>
 
+	<h3>Star Wars<br/>Episode VII The Force Awakens</h3>
+	<p>JPG 1458x2160 - 1.7MB</p>
+	<div thumb-lazy original-src="star-wars-force-awakens-official-poster.jpg" thumb-src="star-wars-force-awakens-official-poster-thumb.png" thumb-width="1458" thumb-height="2160" style="width: 100%%;" >
+		<div style="padding-bottom: 148%">
+			<noscript>
+				<img src="star-wars-force-awakens-official-poster.jpg" />
+			</noscript>
+		</div>
+	</div>
+
+	<h3>Cruciform</h3>
+	<p>PNG 512x256 - 186.5KB</p>
+	<div thumb-lazy original-src="cruciform.png" thumb-src="cruciform-thumb.png" thumb-width="512" thumb-height="256" style="width: 100%%;" >
+		<div style="padding-bottom: 50%">
+			<noscript>
+				<img src="cruciform.png" />
+			</noscript>
+		</div>
+	</div>
+
+	<h3>Mona Lisa</h3>
+	<p>JPG 687x1024 - 222.6KB</p>
+	<div thumb-lazy original-src="mona-lisa.jpg" thumb-src="mona-lisa-thumb.png" thumb-width="687" thumb-height="1024" style="width: 100%%">
+		<div style="padding-bottom: 149%">
+			<noscript>
+				<img src="mona-lisa.jpg" />
+			</noscript>
+		</div>
+	</div>
+
+	<h3>DOF</h3>
+	<p>JPG 2880x1800 - 250.1KB</p>
+	<div thumb-lazy original-src="dof.jpg" thumb-src="dof-thumb.png" thumb-width="2880" thumb-height="1800" style="width: 100%%">
+		<div style="padding-bottom: 62.50%">
+			<noscript>
+				<img src="dof.jpg" />
+			</noscript>
+		</div>
+	</div>
 
 </body>
 
 <script type="text/javascript" src="dct-thumb-decoder.min.js"></script>
-<script type="text/javascript">
-
-var thumbs = document.querySelectorAll( '[thumb-src]');
-[].forEach.call( thumbs, function( e ) {
-
-	var dec = new Decoder();
-	e.appendChild( dec.tmpCanvas );
-	e.style.width = e.getAttribute( 'thumb-width' ) + 'px';
-	e.style.height = e.getAttribute( 'thumb-height' ) + 'px';
-	dec.tmpCanvas.style.width = '100%';
-	dec.tmpCanvas.style.height = '100%';
-
-	var img = new Image();
-
-	img.onload = function() {
-		dec.decode( img );
-
-		var fullImg = new Image();
-		e.appendChild( fullImg );
-		fullImg.onload = function() {
-			requestAnimationFrame( function() { fullImg.style.opacity = 1 } );
-		}
-		fullImg.src = e.getAttribute( 'original-src' );
-	}
-
-	img.src = e.getAttribute( 'thumb-src' );
-
-})
-
-</script>
+<script type="text/javascript" src="dct-thumb-loader.min.js"></script>
 
 </html>
