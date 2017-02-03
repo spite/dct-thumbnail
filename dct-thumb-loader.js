@@ -1,71 +1,81 @@
-var images = [];
+window.addEventListener( 'load', function() {
 
-var thumbs = document.querySelectorAll( '[thumb-src]');
-[].forEach.call( thumbs, function( e ) {
+	var images = [];
 
-	var dec = new Decoder();
+	var thumbs = document.querySelectorAll( '[thumb-src]');
+	[].forEach.call( thumbs, function( e ) {
 
-	var aspectRatioFiller = e.querySelector( 'div' );
+		var dec = new Decoder();
 
-	aspectRatioFiller.appendChild( dec.tmpCanvas );
+		var aspectRatioFiller = e.querySelector( 'div' );
 
-	dec.tmpCanvas.style.width = '100%';
-	dec.tmpCanvas.style.height = '100%';
+		aspectRatioFiller.appendChild( dec.tmpCanvas );
 
-	var lazyLoad = e.getAttribute( 'thumb-lazy' ) !== null;
+		dec.tmpCanvas.style.width = '100%';
+		dec.tmpCanvas.style.height = '100%';
 
-	var img = new Image();
+		var lazyLoad = e.getAttribute( 'thumb-lazy' ) !== null;
 
-	img.onload = function() {
+		var img = new Image();
 
-		dec.decode( img );
-		requestAnimationFrame( function() { dec.tmpCanvas.style.opacity = 1 } );
+		img.onload = function() {
 
-		if( !lazyLoad ) loadImage( e.getAttribute( 'original-src' ), aspectRatioFiller );
+			dec.decode( img );
+			requestAnimationFrame( function() { dec.tmpCanvas.style.opacity = 1 } );
+
+			if( !lazyLoad ) loadImage( e.getAttribute( 'original-src' ), aspectRatioFiller );
+
+		}
+
+		if( lazyLoad ) images.push( { src: e.getAttribute( 'original-src' ), element: aspectRatioFiller } );
+
+		img.src = e.getAttribute( 'thumb-src' );
+
+	});
+
+	function loadImage( src, element ) {
+
+		var fullImg = new Image();
+		fullImg.className = 'final';
+		element.appendChild( fullImg );
+		fullImg.onload = function() {
+			requestAnimationFrame( function() { fullImg.style.opacity = 1 } );
+		}
+		fullImg.src = src;
 
 	}
 
-	if( lazyLoad ) images.push( { src: e.getAttribute( 'original-src' ), element: aspectRatioFiller } );
+	function elementInViewport(el) {
 
-	img.src = e.getAttribute( 'thumb-src' );
+		var rect = el.getBoundingClientRect()
+		var h = window.innerHeight || document.documentElement.clientHeight;
+
+		return rect.top <= h && rect.bottom >= 0;
+
+	}
+
+	processScroll = function(){
+
+		for (var i = images.length - 1; i >= 0; i-- ) {
+			if (elementInViewport(images[i].element)) {
+				loadImage(images[i].src, images[i].element )
+				images.splice( i, 1 );
+			}
+		};
+
+	}
+
+	window.addEventListener( 'scroll', scrollInvalidate );
+
+	var timeout = null;
+
+	function scrollInvalidate () {
+
+		if( timeout ) timeout = clearTimeout( timeout );
+		timeout = setTimeout( processScroll, 100 );
+
+	}
+
+	processScroll();
 
 });
-
-function loadImage( src, element ) {
-
-	var fullImg = new Image();
-	fullImg.className = 'final';
-	element.appendChild( fullImg );
-	fullImg.onload = function() {
-		requestAnimationFrame( function() { fullImg.style.opacity = 1 } );
-	}
-	fullImg.src = src;
-
-}
-
-function elementInViewport(el) {
-
-	var rect = el.getBoundingClientRect()
-	var h = window.innerHeight || document.documentElement.clientHeight;
-
-	return rect.top <= h && rect.bottom >= 0;
-
-}
-
-processScroll = function(){
-
-	for (var i = images.length - 1; i >= 0; i-- ) {
-		if (elementInViewport(images[i].element)) {
-			loadImage(images[i].src, images[i].element )
-			images.splice( i, 1 );
-		}
-	};
-
-}
-
-checkScroll();
-
-function checkScroll() {
-	processScroll();
-	setTimeout( checkScroll, 500 );
-}
