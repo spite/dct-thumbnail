@@ -142,7 +142,7 @@ fs.readFile(__dirname + '/' + fname, function(err, data) {
 
 		var str = `
 <div thumb-lazy original-src="${fname}" thumb-src="${baseName}-thumb.png" thumb-width="${img.width}" thumb-height="${img.height}" style="background-color: #${color}; width: 100%;" >
-  div style="padding-bottom: ${img.height * 100 / img.width}%">
+  <div style="padding-bottom: ${img.height * 100 / img.width}%">
     <noscript>
       <img src="${fname}" />
     </noscript>
