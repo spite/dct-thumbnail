@@ -1,5 +1,7 @@
-var Canvas = require('canvas');
-var fs = require('fs');
+const Canvas = require('canvas');
+const fs = require('fs');
+const path = require('path');
+const rgbHex = require('rgb-hex');
 
 class Encoder {
 
@@ -112,7 +114,10 @@ class Encoder {
 
 }
 
-fs.readFile(__dirname + '/' +process.argv[ 2 ], function(err, data) {
+const fname = process.argv[ 2 ];
+const baseName = path.basename( fname, path.extname( fname ) );
+
+fs.readFile(__dirname + '/' + fname, function(err, data) {
 
 	var enc = new Encoder();
 	var img = new Canvas.Image;
@@ -120,7 +125,13 @@ fs.readFile(__dirname + '/' +process.argv[ 2 ], function(err, data) {
 
 	enc.encode( img );
 
-	var out = fs.createWriteStream(__dirname + '/thumb.png')
+	var pixel = enc.tmpCtx.getImageData( 0, 0, 1, 1 ).data;
+	var r = pixel[ 0 ];
+	var g = pixel[ 1 ];
+	var b = pixel[ 2 ];
+	var color = rgbHex(r,g,b);
+
+	var out = fs.createWriteStream(__dirname + '/' + baseName + '-thumb.png')
 	var stream = enc.tmpCanvas.pngStream();
 
 	stream.on('data', function(chunk){
@@ -128,6 +139,18 @@ fs.readFile(__dirname + '/' +process.argv[ 2 ], function(err, data) {
 	});
 
 	stream.on('end', function(){
+
+		var str = `
+<div thumb-lazy original-src="${fname}" thumb-src="${baseName}-thumb.png" thumb-width="${img.width}" thumb-height="${img.height}" style="background-color: #${color}; width: 100%;" >
+  div style="padding-bottom: ${img.height * 100 / img.width}%">
+    <noscript>
+      <img src="${fname}" />
+    </noscript>
+  </div>
+</div>`;
+
+		console.log( str );
+
 		console.log('saved png');
 	});
 
