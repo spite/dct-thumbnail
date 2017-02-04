@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "canvas": "^1.6.2",
+    "rgb-hex": "^2.1.0"
+  },
+  "devDependencies": {}
+}
