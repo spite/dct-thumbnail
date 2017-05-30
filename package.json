@@ -3,5 +3,28 @@
     "canvas": "^1.6.2",
     "rgb-hex": "^2.1.0"
   },
-  "devDependencies": {}
+  "devDependencies": {},
+  "name": "dct-thumbnail",
+  "version": "1.0.0",
+  "description": "Utils to create DCT thumbnails",
+  "main": "dct-thumb-encoder.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/spite/dct-thumbnail.git"
+  },
+  "keywords": [
+    "thumbnail",
+    "dct",
+    "lazy",
+    "loading"
+  ],
+  "author": "Jaume Sanchez <the.spite@gmail.com> (https://www.clicktorelease.com)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/spite/dct-thumbnail/issues"
+  },
+  "homepage": "https://github.com/spite/dct-thumbnail#readme"
 }
