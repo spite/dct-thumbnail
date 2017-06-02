@@ -1,4 +1,4 @@
-'use strict';
+const Canvas = require('canvas');
 
 class Encoder {
 
@@ -10,10 +10,10 @@ class Encoder {
 		this.DCTMatrix = [];
 		this.initDCTMatrix();
 
-		this.imgCanvas = document.createElement( 'canvas' );
+		this.imgCanvas = new Canvas();
 		this.imgCtx = this.imgCanvas.getContext( '2d' );
 
-		this.tmpCanvas = document.createElement( 'canvas' );
+		this.tmpCanvas = new Canvas();
 		this.tmpCtx = this.tmpCanvas.getContext( '2d' );
 
 	}
@@ -110,3 +110,5 @@ class Encoder {
 	}
 
 }
+
+module.exports = Encoder;
