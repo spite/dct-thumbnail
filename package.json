@@ -1,6 +1,6 @@
 {
   "name": "dct-thumbnail",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Thumbnails of images that fit in a few dozen bytes, to show while the image loads",
   "type": "module",
   "main": "src/dct-thumbnail.js",
