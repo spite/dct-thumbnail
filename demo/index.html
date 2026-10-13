@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>DCT Thumbnail</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="color-scheme" content="light dark">
+	<style>
+		:root{ --text: #24292f; --background: #ffffff; --link: #0969da; --border: #d0d7de; --muted: #57606a; --pre: #f6f8fa; --keyword: #cf222e; --string: #0a3069; --number: #0550ae; --comment: #6e7781; --function: #8250df; --tag: #116329; }
+		@media ( prefers-color-scheme: dark ) {
+			:root{ --text: #e6edf3; --background: #0d1117; --link: #58a6ff; --border: #30363d; --muted: #8b949e; --pre: #161b22; --keyword: #ff7b72; --string: #a5d6ff; --number: #79c0ff; --comment: #8b949e; --function: #d2a8ff; --tag: #7ee787; }
+		}
+		*{ box-sizing: border-box; }
+		body{ margin: 0; padding: 32px 16px 64px; color: var( --text ); background-color: var( --background ); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; font-size: 16px; line-height: 1.5; }
+		main{ max-width: 800px; margin: 0 auto; }
+		a{ color: var( --link ); }
+		h1{ font-size: 2em; margin: 0 0 16px; padding-bottom: .3em; border-bottom: 1px solid var( --border ); }
+		h2{ font-size: 1.5em; margin: 40px 0 16px; padding-bottom: .3em; border-bottom: 1px solid var( --border ); }
+		p{ margin: 0 0 16px; }
+		.note{ color: var( --muted ); font-size: 14px; }
+		code{ font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 85%; padding: .2em .4em; border-radius: 6px; background-color: var( --pre ); }
+		pre{ margin: 0 0 16px; padding: 16px; overflow: auto; border-radius: 6px; background-color: var( --pre ); font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 13px; line-height: 1.45; white-space: pre-wrap; word-break: break-all; }
+		button, input[type=file]{ font: inherit; font-size: 14px; }
+		input[type=file]::file-selector-button{ font: inherit; margin-right: 10px; padding: 5px 16px; border: 1px solid var( --border ); border-radius: 6px; background-color: var( --pre ); color: var( --text ); cursor: pointer; }
+		input[type=range]{ -webkit-appearance: none; appearance: none; width: 160px; height: 20px; margin: 0; background: transparent; cursor: pointer; }
+		input[type=range]::-webkit-slider-runnable-track{ height: 6px; border-radius: 3px; background-color: var( --border ); }
+		input[type=range]::-moz-range-track{ height: 6px; border-radius: 3px; background-color: var( --border ); }
+		input[type=range]::-webkit-slider-thumb{ -webkit-appearance: none; width: 18px; height: 18px; margin-top: -6px; border-radius: 50%; border: 2px solid var( --background ); background-color: var( --link ); box-shadow: 0 0 0 1px var( --link ); }
+		input[type=range]::-moz-range-thumb{ width: 14px; height: 14px; border-radius: 50%; border: 2px solid var( --background ); background-color: var( --link ); box-shadow: 0 0 0 1px var( --link ); }
+		input[type=range]:focus-visible{ outline: 2px solid var( --link ); outline-offset: 4px; border-radius: 4px; }
+		.controls output{ min-width: 3.5em; font-variant-numeric: tabular-nums; color: var( --muted ); }
+		.stack{ position: relative; }
+		.stack img{ position: absolute; left: 0; top: 0; height: 100%; opacity: 0; }
+		button{ padding: 5px 16px; border: 1px solid var( --border ); border-radius: 6px; background-color: var( --pre ); color: var( --text ); cursor: pointer; }
+		.controls{ display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; margin-bottom: 16px; }
+		.controls label{ display: flex; align-items: center; gap: 8px; }
+		.pair{ display: flex; gap: 16px; margin-bottom: 16px; }
+		.pair figure{ flex: 1; min-width: 0; margin: 0; }
+		.pair figcaption{ font-size: 14px; color: var( --muted ); margin-top: 6px; }
+		.pair img, .pair canvas{ display: block; width: 100%; height: auto; border-radius: 6px; }
+		#drop.over{ outline: 2px dashed var( --link ); outline-offset: 8px; }
+		pre .keyword{ color: var( --keyword ); }
+		pre .string{ color: var( --string ); }
+		pre .number, pre .attribute{ color: var( --number ); }
+		pre .comment{ color: var( --comment ); }
+		pre .function{ color: var( --function ); }
+		pre .tag{ color: var( --tag ); }
+		#page{ position: relative; }
+		/* an image with nothing to load yet is drawn with an outline, this is drawn in its place */
+		#page img:not( [src] ){ content: url( "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'/%3E" ); }
+		#page img{ display: block; width: 100%; max-width: 400px; height: auto; border-radius: 6px; }
+	</style>
+</head>
+<body>
+<main>
+
+	<h1>DCT Thumbnail</h1>
+	<p>A thumbnail of an image that fits in a few dozen bytes, to show in its place while the image loads. It keeps the lowest frequencies of the image, the ones that say what it looks like from far away. <a href="https://github.com/spite/dct-thumbnail">GitHub</a></p>
+
+	<h2>Make a thumbnail</h2>
+	<p>Choose an image, or drop one in the page. Nothing is uploaded, it's all done here.</p>
+	<div id="drop">
+		<div class="controls">
+			<input type="file" id="file" accept="image/*">
+			<label>Frequencies along each side <input type="range" id="coefficients" min="1" max="8" value="4"> <output id="count"></output></label>
+			<label>Thumbnail <input type="range" id="fade" min="0" max="100" value="0"> Image</label>
+		</div>
+		<div class="pair">
+			<figure><img id="original" src="mona-lisa.jpg" alt="The image"><figcaption id="originalCaption"></figcaption></figure>
+			<figure><div class="stack"><canvas id="thumb"></canvas><img id="over" src="mona-lisa.jpg" alt=""></div><figcaption id="thumbCaption"></figcaption></figure>
+		</div>
+		<p>The thumbnail, as text:</p>
+		<pre id="string"></pre>
+		<p>And how to use it in a page:</p>
+		<pre id="snippet" data-language="html"></pre>
+	</div>
+
+	<h2>In a page</h2>
+	<p>The image below is a plain <code>&lt;img&gt;</code> with its thumbnail in <code>data-thumb</code>. Here it waits two seconds before it starts to load, to give you time to see the thumbnail, and then it fades in. <button id="again">Again</button></p>
+	<div id="page"></div>
+	<p class="note">Mona Lisa, 687 x 1024, 199 KB. Its thumbnail is 49 bytes.</p>
+
+	<h2>How to use it</h2>
+	<p>Install it with npm, or get the two files in <a href="https://github.com/spite/dct-thumbnail/tree/master/src">src</a>. They are plain ES modules with no dependencies.</p>
+	<pre>npm i dct-thumbnail</pre>
+	<p><b>1. Make the thumbnail of each image.</b> Once, when the image is added to your site. Use the tool at the top of this page and copy the text, or do it from your own code:</p>
+	<pre data-language="js">import { encode, toBase64 } from 'dct-thumbnail';
+
+const thumb = toBase64( encode( image ) );</pre>
+	<p><code>image</code> is an image, a canvas or a video. Where there's no page, like in Node, it's <code>{ data, width, height }</code> with the RGBA pixels of the image.</p>
+	<p><b>2. Put it in the image</b>, as <code>data-thumb</code>. Give the image its size, so the page keeps its place before it loads, and <code>loading="lazy"</code> to load it only when it's about to be seen:</p>
+	<pre data-language="html">&lt;img src="mona-lisa.jpg" width="687" height="1024" loading="lazy"
+  data-thumb="BFRGM4qFgXeAh3BzeqizlXd5fYiOh4KAf3qDhH+AgoSGg3x/gYOGhYaGgYqAf4WDgQ=="&gt;</pre>
+	<p><b>3. Show the thumbnails</b>, once the images are in the page. Every image with a <code>data-thumb</code> that hasn't loaded yet shows it until it does:</p>
+	<pre data-language="js">import { applyThumbnails } from 'dct-thumbnail/loader';
+
+applyThumbnails();</pre>
+	<p>To have the images fade in over their thumbnails, like the one above, pass how long it takes in milliseconds. Call it again when images are added to the page, the ones that were done are skipped.</p>
+	<pre data-language="js">applyThumbnails( document, { fade: 800 } );</pre>
+	<p>Without scripts the images are just images, and they load as they always do. There's more in the <a href="https://github.com/spite/dct-thumbnail#readme">README</a>: thumbnails with more or less detail, decoding them yourself, and what the format is.</p>
+
+</main>
+<script type="module">
+import { encode, decode, toBase64, averageColor } from '../src/dct-thumbnail.js';
+import { applyThumbnails } from '../src/dct-thumbnail-loader.js';
+
+// colors for the code of the page: what each piece is, in the order they are looked for
+const languages = {
+	js: [
+		[ 'comment', /\/\/.*|\/\*[\s\S]*?\*\// ],
+		[ 'string', /'[^'\n]*'|"[^"\n]*"|`[^`]*`/ ],
+		[ 'keyword', /\b(?:import|from|export|const|let|var|function|return|await|async|new|if|else|for|of)\b/ ],
+		[ 'number', /\b\d+(?:\.\d+)?\b/ ],
+		[ 'function', /\b[A-Za-z_$][\w$]*(?=\s*\()/ ]
+	],
+	html: [
+		[ 'comment', /<!--[\s\S]*?-->/ ],
+		[ 'string', /"[^"]*"/ ],
+		[ 'tag', /<\/?[a-zA-Z][\w-]*|\/?>/ ],
+		[ 'attribute', /[a-zA-Z-]+(?==)/ ]
+	]
+};
+
+function highlight( pre ) {
+
+	const rules = languages[ pre.dataset.language ];
+	const text = pre.textContent;
+
+	if ( ! rules ) return;
+
+	// one expression with a group for each kind, so what is found first wins
+	const all = new RegExp( rules.map( ( [ , re ] ) => '(' + re.source + ')' ).join( '|' ), 'g' );
+	const parts = [];
+	let last = 0;
+
+	for ( const match of text.matchAll( all ) ) {
+
+		const span = document.createElement( 'span' );
+		span.className = rules[ match.findIndex( ( group, j ) => j > 0 && group !== undefined ) - 1 ][ 0 ];
+		span.textContent = match[ 0 ];
+		parts.push( text.slice( last, match.index ), span );
+		last = match.index + match[ 0 ].length;
+
+	}
+
+	pre.replaceChildren( ...parts, text.slice( last ) );
+
+}
+
+document.querySelectorAll( 'pre[data-language]' ).forEach( highlight );
+
+const original = document.getElementById( 'original' );
+const canvas = document.getElementById( 'thumb' );
+const slider = document.getElementById( 'coefficients' );
+const over = document.getElementById( 'over' );
+const fade = document.getElementById( 'fade' );
+let name = 'mona-lisa.jpg';
+
+function update() {
+
+	if ( ! original.complete || original.naturalWidth === 0 ) return;
+
+	const width = original.naturalWidth, height = original.naturalHeight;
+	const thumb = encode( original, Number( slider.value ) );
+	const string = toBase64( thumb );
+
+	// the thumbnail drawn with the shape of the image
+	canvas.width = 256;
+	canvas.height = Math.round( 256 * height / width );
+	canvas.getContext( '2d' ).putImageData( new ImageData( decode( thumb, canvas.width, canvas.height ).data, canvas.width, canvas.height ), 0, 0 );
+
+	document.getElementById( 'count' ).textContent = slider.value + ' x ' + slider.value;
+	document.getElementById( 'originalCaption' ).textContent = 'The image, ' + width + ' x ' + height;
+	document.getElementById( 'thumbCaption' ).textContent = 'Its thumbnail, ' + thumb.length + ' bytes. The average color is ' + averageColor( thumb );
+	document.getElementById( 'string' ).textContent = string;
+	const snippet = document.getElementById( 'snippet' );
+	snippet.textContent = '<img src="' + name + '" width="' + width + '" height="' + height + '" loading="lazy" data-thumb="' + string + '">';
+	highlight( snippet );
+
+}
+
+function read( file ) {
+
+	if ( ! file || ! file.type.startsWith( 'image/' ) ) return;
+
+	name = file.name;
+	URL.revokeObjectURL( original.src );
+	original.src = over.src = URL.createObjectURL( file );
+
+}
+
+original.addEventListener( 'load', update );
+slider.addEventListener( 'input', update );
+
+// the image over its thumbnail, as much as the slider says
+fade.addEventListener( 'input', () => over.style.opacity = fade.value / 100 );
+document.getElementById( 'file' ).addEventListener( 'change', e => read( e.target.files[ 0 ] ) );
+
+const drop = document.getElementById( 'drop' );
+window.addEventListener( 'dragover', function ( e ) {
+
+	e.preventDefault();
+	drop.classList.add( 'over' );
+
+} );
+window.addEventListener( 'dragleave', () => drop.classList.remove( 'over' ) );
+window.addEventListener( 'drop', function ( e ) {
+
+	e.preventDefault();
+	drop.classList.remove( 'over' );
+	read( e.dataTransfer.files[ 0 ] );
+
+} );
+
+update();
+
+// an image as it would be in a page, that starts to load after a while
+const page = document.getElementById( 'page' );
+let timeout;
+
+function show() {
+
+	clearTimeout( timeout );
+
+	const img = document.createElement( 'img' );
+	img.width = 687;
+	img.height = 1024;
+	img.alt = '';
+	img.dataset.thumb = 'BFRGM4qFgXeAh3BzeqizlXd5fYiOh4KAf3qDhH+AgoSGg3x/gYOGhYaGgYqAf4WDgQ==';
+	page.replaceChildren( img );
+
+	applyThumbnails( page, { fade: 800 } );
+
+	timeout = setTimeout( () => img.src = 'mona-lisa.jpg', 2000 );
+
+}
+
+document.getElementById( 'again' ).addEventListener( 'click', show );
+show();
+</script>
+</body>
+</html>
